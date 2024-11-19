@@ -1,0 +1,184 @@
+
+خلاصه پروژه: مدیریت کاربران (User Management)
+
+۱. اهداف پروژه
+- پیاده‌سازی سیستم مدیریت کاربران با قابلیت‌های ورود، ثبت‌نام، و مدیریت تنظیمات.
+- پشتیبانی از دو روش ورود: 
+  1. یوزر و پسورد
+  2. کد تأیید پیامکی.
+- طراحی زیبا با استفاده از Bootstrap.
+- استفاده از Entity Framework Core برای مدیریت پایگاه داده.
+- مدیریت پیامک‌ها با استفاده از سرویس پیامکی شخصی.
+
+۲. ساختار پروژه
+لایه‌ها و Areaها
+- Area Account:
+  - مدیریت ورود و ثبت‌نام کاربران.
+  - متدها:
+    - LoginWithPassword: ورود با یوزر و پسورد.
+    - LoginWithMobile: ورود با شماره موبایل و کد پیامکی.
+    - VerifyCode: تأیید کد پیامکی.
+  - ویوها:
+    - LoginWithPassword.cshtml
+    - LoginWithMobile.cshtml
+    - VerifyCode.cshtml
+
+- Area Admin:
+  - مدیریت تنظیمات ورود.
+  - متدها:
+    - Index: نمایش و ویرایش تنظیمات.
+  - ویوها:
+    - Index.cshtml (تنظیمات ورود).
+
+مدل‌ها
+1. Setting:
+   - مدیریت تنظیمات ورود کاربران.
+   - فیلد:
+     - LoginMethod: مشخص‌کننده روش ورود کاربران (UserAndPassword یا MobileCode).
+2. ApplicationUser:
+   - مدل سفارشی کاربر که از IdentityUser ارث‌بری کرده است.
+
+پایگاه داده
+- جداول ایجاد‌شده:
+  1. AspNetUsers (مدیریت کاربران).
+  2. Settings (مدیریت تنظیمات ورود).
+
+۳. مراحل انجام شده
+
+۱. تنظیمات اولیه پروژه
+- نصب و تنظیم Entity Framework Core و اتصال به پایگاه داده SQL Server.
+- پیاده‌سازی مدل‌های ApplicationUser و Setting و افزودن آن‌ها به ApplicationDbContext.
+
+۲. مدیریت تنظیمات ورود
+- ایجاد Area Admin.
+- افزودن قابلیت مدیریت تنظیمات ورود در جدول Settings.
+- پیاده‌سازی متدهای GET و POST برای ذخیره و بازیابی تنظیمات.
+
+۳. طراحی صفحات ورود و ثبت‌نام
+- استفاده از Bootstrap برای طراحی زیبا و مدرن صفحات:
+  - ورود با یوزر و پسورد.
+  - ورود با شماره موبایل و کد تأیید.
+  - تأیید کد پیامکی.
+
+۴. ارسال پیامک
+- پیاده‌سازی کلاس SMSService برای ارسال پیامک با استفاده از HttpClient.
+- انتقال API Key و Base URL به فایل appsettings.json برای مدیریت بهتر تنظیمات.
+- مدیریت خطاهای سرویس پیامکی:
+  - قطع اینترنت.
+  - Timeout.
+  - موجودی ناکافی سرویس پیامکی.
+
+۵. نمایش خطاهای سفارشی
+- سفارشی کردن پیام‌های خطا برای کاربر:
+  - قطع اینترنت: ارتباط با اینترنت برقرار نیست. لطفاً اتصال اینترنت خود را بررسی کنید.
+  - Timeout: زمان درخواست به پایان رسید. لطفاً دوباره تلاش کنید.
+  - خطاهای سرور: خطای سرور: {کد خطا} - {متن خطا}.
+
+۴. فایل‌های مهم
+
+۱. appsettings.json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=.\MSSQL;Database=UserManagementDb;User ID=sa;Password=951263784;TrustServerCertificate=True;MultipleActiveResultSets=true"
+  },
+  "Jwt": {
+    "Key": "YourSuperSecretKey",
+    "Issuer": "YourIssuer",
+    "Audience": "YourAudience"
+  },
+  "SmsService": {
+    "ApiKey": "789432:6215f0c5f177e",
+    "BaseUrl": "http://toptip.ir/webservice/rest/sms_send"
+  }
+}
+
+۲. ApplicationDbContext.cs
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using UserManagement.Models;
+
+namespace UserManagement.Data
+{
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    {
+        public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
+            : base(options)
+        {
+        }
+
+        public DbSet<Setting> Settings { get; set; }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Setting>().HasData(
+                new Setting
+                {
+                    Id = 1,
+                    LoginMethod = "UserAndPassword" // مقدار پیش‌فرض
+                }
+            );
+        }
+    }
+}
+
+۳. SMSService.cs
+using System.Net.Http;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
+
+namespace UserManagement.Services
+{
+    public class SMSService
+    {
+        private readonly HttpClient _httpClient;
+        private readonly string _apiKey;
+        private readonly string _baseUrl;
+
+        public SMSService(HttpClient httpClient, IConfiguration configuration)
+        {
+            _httpClient = httpClient;
+            _apiKey = configuration["SmsService:ApiKey"];
+            _baseUrl = configuration["SmsService:BaseUrl"];
+        }
+
+        public async Task<string> SendSmsAsync(string message, string receiverNumber, string senderNumber)
+        {
+            try
+            {
+                string url = $"{_baseUrl}?note_arr[]={message}&api_key={_apiKey}&receiver_number={receiverNumber}&sender_number={senderNumber}";
+                var response = await _httpClient.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    var errorContent = await response.Content.ReadAsStringAsync();
+                    return $"خطای سرور: {response.StatusCode} - {errorContent}";
+                }
+
+                var responseContent = await response.Content.ReadAsStringAsync();
+                if (responseContent.Contains("error") || responseContent.Contains("insufficient balance"))
+                {
+                    return "موجودی کافی نیست یا خطای دیگری رخ داده است.";
+                }
+
+                return "Success";
+            }
+            catch (HttpRequestException)
+            {
+                return "ارتباط با اینترنت برقرار نیست. لطفاً اتصال اینترنت خود را بررسی کنید.";
+            }
+            catch (TaskCanceledException)
+            {
+                return "زمان درخواست به پایان رسید. لطفاً دوباره تلاش کنید.";
+            }
+            catch
+            {
+                return "خطای نامشخصی رخ داده است. لطفاً دوباره تلاش کنید.";
+            }
+        }
+    }
+}
+
+۵. ادامه پروژه
+این مستند شامل تمام تغییرات و کدهای مهم است و می‌تواند برای ادامه کار یا توسعه‌های آتی مفید باشد. اگر مشکلی داشتید یا نیاز به ادامه کار بود، با ارائه این مستند می‌توانم به شما کمک کنم.
