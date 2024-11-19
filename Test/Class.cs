@@ -8,7 +8,8 @@
         }
         public int test3(int a, int b)
         {
-            return a / b;
+            return a - b;
+            
             
         }
     }
