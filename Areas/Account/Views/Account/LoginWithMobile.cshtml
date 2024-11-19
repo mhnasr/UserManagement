@@ -1,0 +1,26 @@
+﻿@{
+    ViewData["Title"] = "ورود با شماره موبایل";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+@if (!ViewData.ModelState.IsValid)
+{
+    <div class="alert alert-danger">
+        <ul>
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <li>@error.ErrorMessage</li>
+            }
+        </ul>
+    </div>
+}
+<div class="container mt-5">
+    <h2>ورود با شماره موبایل</h2>
+    <form method="post" action="/account/account/loginwithmobile">
+        <div class="mb-3">
+            <label for="phoneNumber" class="form-label">شماره موبایل</label>
+            <input type="text" class="form-control" id="phoneNumber" name="phoneNumber" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">ارسال کد</button>
+    </form>
+
+</div>

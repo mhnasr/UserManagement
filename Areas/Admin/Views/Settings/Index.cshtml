@@ -1,0 +1,26 @@
+﻿@model UserManagement.Models.Setting
+
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "تنظیمات ورود به سایت";
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4">تنظیمات ورود به سایت</h2>
+    <form method="post">
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="LoginMethod" id="userAndPassword" value="UserAndPassword" @(Model.LoginMethod == "UserAndPassword" ? "checked" : "")>
+            <label class="form-check-label" for="userAndPassword">
+                ورود از طریق یوزر و پسورد
+            </label>
+        </div>
+        <div class="form-check">
+            <input class="form-check-input" type="radio" name="LoginMethod" id="mobileCode" value="MobileCode" @(Model.LoginMethod == "MobileCode" ? "checked" : "")>
+            <label class="form-check-label" for="mobileCode">
+                ورود از طریق کد ارسال شده به موبایل
+            </label>
+        </div>
+        <button type="submit" class="btn btn-primary mt-3">ذخیره تنظیمات</button>
+    </form>
+</div>

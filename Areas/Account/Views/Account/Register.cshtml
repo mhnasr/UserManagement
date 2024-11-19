@@ -1,65 +1,99 @@
-﻿@model UserManagement.Models.RegisterViewModel
-@{
-    Layout = "~/Views/Shared/_Layout.cshtml";
-}
-@if (!ViewData.ModelState.IsValid)
-{
-    <div class="alert alert-danger">
-        <ul>
-            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
-            {
-                <li>@error.ErrorMessage</li>
-            }
-        </ul>
-    </div>
+﻿@{
+    Layout = null;
 }
 
+<!DOCTYPE html>
+<html lang="fa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ثبت‌نام</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f5f7;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
 
+        .register-container {
+            background: #fff;
+            border-radius: 15px;
+            padding: 30px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
 
+        .register-header {
+            text-align: center;
+            font-size: 24px;
+            font-weight: bold;
+            color: #333333;
+            margin-bottom: 20px;
+        }
 
-<div class="container mt-5">
-    <h2 class="text-center">ثبت‌نام</h2>
-    <form method="post" class="needs-validation" novalidate>
-        <div class="row mb-3">
-            <div class="col-md-6">
+        .form-control {
+            border-radius: 10px;
+        }
+
+        .btn-register {
+            background-color: #6c63ff;
+            border: none;
+            border-radius: 10px;
+        }
+
+        .btn-register:hover {
+            background-color: #574fb9;
+        }
+
+        .text-muted {
+            text-align: center;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+
+        .text-muted a {
+            color: #6c63ff;
+            text-decoration: none;
+        }
+
+        .text-muted a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="register-container">
+        <div class="register-header">ایجاد حساب کاربری</div>
+        <form method="post" action="/Account/Register" class="needs-validation" novalidate>
+            <div class="mb-3">
                 <label for="firstName" class="form-label">نام</label>
-                <input type="text" class="form-control" id="firstName" name="FirstName" value="@Model.FirstName" required>
+                <input type="text" class="form-control" id="firstName" name="FirstName" required>
                 <div class="invalid-feedback">لطفاً نام خود را وارد کنید.</div>
             </div>
-            <div class="col-md-6">
+            <div class="mb-3">
                 <label for="lastName" class="form-label">نام خانوادگی</label>
-                <input type="text" class="form-control" id="lastName" name="LastName" value="@Model.LastName" required>
+                <input type="text" class="form-control" id="lastName" name="LastName" required>
                 <div class="invalid-feedback">لطفاً نام خانوادگی خود را وارد کنید.</div>
             </div>
-        </div>
-        <div class="mb-3">
-            <label for="phoneNumber" class="form-label">شماره موبایل</label>
-            <input type="text" class="form-control" id="phoneNumber" name="PhoneNumber" value="@Model.PhoneNumber" required>
-            <div class="invalid-feedback">لطفاً شماره موبایل معتبر وارد کنید.</div>
-        </div>
-        <div class="mb-3">
-    <label for="password" class="form-label">کلمه عبور</label>
-    <input type="password" class="form-control" id="password" name="Password" required>
-    <small class="text-muted">
-        رمز عبور باید حداقل ۶ کاراکتر باشد و شامل حروف بزرگ و کوچک باشد.
-    </small>
-</div>
-        <button type="submit" class="btn btn-primary w-100">ثبت‌نام</button>
-    </form>
-</div>
-
-<script>
-    (function () {
-        'use strict';
-        var forms = document.querySelectorAll('.needs-validation');
-        Array.prototype.slice.call(forms).forEach(function (form) {
-            form.addEventListener('submit', function (event) {
-                if (!form.checkValidity()) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            }, false);
-        });
-    })();
-</script>
+            <div class="mb-3">
+                <label for="phoneNumber" class="form-label">شماره موبایل</label>
+                <input type="text" class="form-control" id="phoneNumber" name="PhoneNumber" required>
+                <div class="invalid-feedback">لطفاً شماره موبایل معتبر وارد کنید.</div>
+            </div>
+            <div class="mb-3">
+                <label for="password" class="form-label">کلمه عبور</label>
+                <input type="password" class="form-control" id="password" name="Password" required>
+                <div class="invalid-feedback">لطفاً کلمه عبور خود را وارد کنید.</div>
+            </div>
+            <button type="submit" class="btn btn-register w-100">ثبت‌نام</button>
+            <div class="text-muted mt-3">
+                <small>حساب کاربری دارید؟ <a href="/Account/Login">وارد شوید</a></small>
+            </div>
+        </form>
+    </div>
+</body>
+</html>

@@ -6,6 +6,7 @@ using Serilog;
 using UserManagement.Data;
 using UserManagement.Helpers;
 using UserManagement.Models;
+using UserManagement.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,8 @@ builder.Host.UseSerilog((context, configuration) =>
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+//اضافه کردن سرویس پیامکی
+builder.Services.AddHttpClient<SMSService>();
 
 
 builder.Services.Configure<IdentityOptions>(options =>
@@ -102,6 +105,9 @@ app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
 );
+
+
+
 
 
 app.Run();

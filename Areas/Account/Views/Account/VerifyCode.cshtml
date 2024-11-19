@@ -1,0 +1,16 @@
+﻿@{
+    ViewData["Title"] = "تأیید کد";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <h2>تأیید کد ورود</h2>
+    <form method="post" action="/account/account/verifycode">
+        <div class="mb-3">
+            <label for="code" class="form-label">کد تأیید</label>
+            <input type="text" class="form-control" id="code" name="code" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">ورود</button>
+    </form>
+
+</div>
