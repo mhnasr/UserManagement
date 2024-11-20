@@ -7,23 +7,25 @@ namespace UserManagement.Services
     public class SMSService
     {
         private readonly HttpClient _httpClient;
-        private readonly string _apiKey;
-        private readonly string _baseUrl;
+        private readonly string? _apiKey;
+        private readonly string? _baseUrl;
+        private readonly string? _senderNumber;
 
         public SMSService(HttpClient httpClient, IConfiguration configuration)
         {
             _httpClient = httpClient;
             _apiKey = configuration["SmsService:ApiKey"];
             _baseUrl = configuration["SmsService:BaseUrl"];
+            _senderNumber = configuration["SmsService:SenderNumber"];
         }
 
-        public async Task<string> SendSmsAsync(string message, string receiverNumber, string senderNumber)
+        public async Task<string> SendSmsAsync(string message, string receiverNumber)
         {
             try
             {
                 // ساخت URL برای ارسال پیامک
-                message = message + "\n لغو 11";
-                string url = $"{_baseUrl}?note_arr[]={message}&api_key={_apiKey}&receiver_number={receiverNumber}&sender_number={senderNumber}";
+                //message = message + "\n لغو 11";
+                string url = $"{_baseUrl}?note_arr[]={message}&api_key={_apiKey}&receiver_number={receiverNumber}&sender_number={_senderNumber}";
 
                 // ارسال درخواست GET
                 var response = await _httpClient.GetAsync(url);

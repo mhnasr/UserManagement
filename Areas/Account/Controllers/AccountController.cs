@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using UserManagement.Areas.Account.Models;
 using UserManagement.Data;
 using UserManagement.Models;
 using UserManagement.Services;
@@ -67,7 +68,7 @@ namespace UserManagement.Areas.Account.Controllers
                 var verificationCode = new Random().Next(1000, 9999).ToString();
 
                 // ارسال پیامک
-                var smsResult = await _smsService.SendSmsAsync($"کد تأیید شما: {verificationCode} ", phoneNumber, "100040001");
+                var smsResult = await _smsService.SendSmsAsync($"کد تأیید شما: {verificationCode} ", phoneNumber);
 
                 if (smsResult == "Success")
                 {
@@ -131,6 +132,9 @@ namespace UserManagement.Areas.Account.Controllers
             ModelState.AddModelError(string.Empty, "کد تأیید اشتباه است.");
             return View();
         }
+
+
+
 
 
     }

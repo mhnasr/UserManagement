@@ -63,6 +63,14 @@ builder.Services.AddAuthentication(options =>
     };
 });
 
+// پیکربندی Session
+builder.Services.AddSession(options =>
+{
+    options.IdleTimeout = TimeSpan.FromMinutes(30); // زمان انقضا
+    options.Cookie.HttpOnly = true; // محافظت از کوکی
+    options.Cookie.IsEssential = true; // ضروری برای کار با Session
+});
+
 // تنظیم مسیرهای کوکی‌ها
 builder.Services.ConfigureApplicationCookie(options =>
 {
@@ -88,7 +96,7 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
-
+app.UseSession();
 app.UseRouting();
 
 app.UseAuthentication(); // برای Identity و JWT
@@ -104,6 +112,10 @@ app.MapControllerRoute(
 app.MapControllerRoute(
     name: "areas",
     pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
+);
+app.MapControllerRoute(
+    name: "Account",
+    pattern: "Account/{controller=Home}/{action=Index}/{id?}"
 );
 
 
