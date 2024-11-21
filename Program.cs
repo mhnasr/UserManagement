@@ -1,8 +1,10 @@
 ﻿using FluentValidation.AspNetCore;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
+using System.Text;
 using UserManagement.Data;
 using UserManagement.Helpers;
 using UserManagement.Models;
@@ -21,71 +23,90 @@ builder.Host.UseSerilog((context, configuration) =>
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-//اضافه کردن سرویس پیامکی
-builder.Services.AddHttpClient<SMSService>();
-
-
-builder.Services.Configure<IdentityOptions>(options =>
-{
-    // تنظیمات رمز عبور
-    options.Password.RequireDigit = false; // عدم نیاز به عدد
-    options.Password.RequiredLength = 6; // حداقل طول رمز عبور
-    options.Password.RequireNonAlphanumeric = false; // عدم نیاز به کاراکتر خاص
-    options.Password.RequireUppercase = false; // عدم نیاز به حروف بزرگ
-    options.Password.RequireLowercase = false; // عدم نیاز به حروف کوچک
-});
-
+// افزودن Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddDefaultTokenProviders()
     .AddErrorDescriber<CustomIdentityErrorDescriber>();
 
-
-// تنظیم Authentication با JWT (اختیاری)
-builder.Services.AddAuthentication(options =>
+// تنظیمات Identity
+builder.Services.Configure<IdentityOptions>(options =>
 {
-    options.DefaultAuthenticateScheme = "JwtBearer";
-    options.DefaultChallengeScheme = "JwtBearer";
-})
-.AddJwtBearer("JwtBearer", options =>
-{
-    options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
-    {
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidateLifetime = true,
-        ValidateIssuerSigningKey = true,
-        ValidIssuer = builder.Configuration["Jwt:Issuer"],
-        ValidAudience = builder.Configuration["Jwt:Audience"],
-        IssuerSigningKey = new SymmetricSecurityKey(
-            System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])
-        )
-    };
+    options.Password.RequiredLength = 6;
+    options.Password.RequireNonAlphanumeric = false;
+    options.Password.RequireUppercase = false;
+    options.Password.RequireLowercase = false;
 });
 
-// پیکربندی Session
+// تنظیم Authentication با JWT
+var jwtKey = builder.Configuration["Jwt:Key"];
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
+    {
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateLifetime = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = builder.Configuration["Jwt:Issuer"],
+            ValidAudience = builder.Configuration["Jwt:Audience"],
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+        };
+    });
+
+// افزودن Session
 builder.Services.AddSession(options =>
 {
-    options.IdleTimeout = TimeSpan.FromMinutes(30); // زمان انقضا
-    options.Cookie.HttpOnly = true; // محافظت از کوکی
-    options.Cookie.IsEssential = true; // ضروری برای کار با Session
+    options.IdleTimeout = TimeSpan.FromMinutes(30);
+    options.Cookie.HttpOnly = true;
+    options.Cookie.IsEssential = true;
 });
 
-// تنظیم مسیرهای کوکی‌ها
+// تنظیم مسیر کوکی‌ها
 builder.Services.ConfigureApplicationCookie(options =>
 {
     options.LoginPath = "/Account/Login";
     options.AccessDeniedPath = "/Account/AccessDenied";
 });
 
-// تنظیم AutoMapper
+//تنظیم عمر کوکی
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.ExpireTimeSpan = TimeSpan.FromMinutes(30); // عمر کوکی
+    options.SlidingExpiration = true; // تمدید خودکار عمر کوکی با هر درخواست
+});
+
+
+
+// افزودن AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-// افزودن FluentValidation (اختیاری)
+// افزودن FluentValidation
 builder.Services.AddControllersWithViews()
     .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<Program>());
 
+// افزودن سرویس پیامکی
+builder.Services.AddHttpClient<SMSService>();
+
+// افزودن سرویس JWT
+builder.Services.AddScoped<JwtService>();
+
 var app = builder.Build();
+
+//برای Seed
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var context = services.GetRequiredService<ApplicationDbContext>();
+    var seeder = new DataSeeder(roleManager, context);
+    await seeder.SeedAllAsync();
+}
+
+
+
 
 // استفاده از Middleware‌ها
 if (!app.Environment.IsDevelopment())
@@ -94,32 +115,21 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
+app.UseSerilogRequestLogging();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseSession();
 app.UseRouting();
 
-app.UseAuthentication(); // برای Identity و JWT
-app.UseAuthorization();  // برای کنترل دسترسی
-
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Home}/{action=Index}/{id?}"
-);
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
-// تنظیم مسیرها (شامل Areaها)
 app.MapControllerRoute(
     name: "areas",
-    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
-);
-app.MapControllerRoute(
-    name: "Account",
-    pattern: "Account/{controller=Home}/{action=Index}/{id?}"
-);
-
-
-
-
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

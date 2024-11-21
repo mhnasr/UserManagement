@@ -1,4 +1,4 @@
-﻿namespace UserManagement.Areas.Account.Models
+﻿namespace UserManagement.Areas.Account.Models.ViewModels
 {
     public class ChangePasswordWithSmsViewModel
     {

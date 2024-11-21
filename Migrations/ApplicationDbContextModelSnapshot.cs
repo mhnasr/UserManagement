@@ -242,7 +242,7 @@ namespace UserManagement.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Settings");
+                    b.ToTable("Settings", (string)null);
 
                     b.HasData(
                         new
