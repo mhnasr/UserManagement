@@ -1,0 +1,24 @@
+﻿@model UserManagement.Areas.Admin.Models.RoleEditViewModel
+
+@{
+    ViewData["Title"] = "ویرایش نقش";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<div class="container mt-5">
+    <h2 class="mb-4">ویرایش نقش</h2>
+
+    <form method="post" asp-action="Edit" asp-controller="Roles">
+        <input type="hidden" asp-for="Id" />
+
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label"></label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+
+        <button type="submit" class="btn btn-primary">ذخیره تغییرات</button>
+        <a href="@Url.Action("Index", "Roles")" class="btn btn-secondary">بازگشت</a>
+    </form>
+</div>

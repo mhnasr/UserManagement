@@ -1,0 +1,29 @@
+﻿
+@{
+    ViewData["Title"] = "ایجاد نقش جدید";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-5">
+    <h2>ایجاد نقش جدید</h2>
+
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="alert alert-danger">
+            <ul>
+                @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+                {
+                    <li>@error.ErrorMessage</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <form method="post" asp-action="Create" asp-controller="Roles" asp-area="Admin" >
+        <div class="mb-3">
+            <label for="roleName" class="form-label">نام نقش</label>
+            <input type="text" class="form-control" id="roleName" name="roleName" required>
+        </div>
+        <button type="submit" class="btn btn-primary">ذخیره</button>
+    </form>
+</div>

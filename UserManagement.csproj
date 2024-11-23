@@ -24,6 +24,7 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="8.0.7" />
 		<PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+		<PackageReference Include="Serilog.Extensions.Logging.File" Version="3.0.0" />
 		<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
 		<PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.2.1" />
 		<PackageReference Include="xunit" Version="2.9.2" />
@@ -34,9 +35,9 @@
 		<Folder Include="Areas\Account\Data\" />
 		<Folder Include="Areas\Account\Views\" />
 		<Folder Include="Areas\Admin\Data\" />
-		<Folder Include="Areas\Admin\Models\" />
 		<Folder Include="Repositories\" />
 		<Folder Include="Tests\" />
+		<Folder Include="Views\Patrials\" />
 	</ItemGroup>
 
 </Project>

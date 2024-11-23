@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 using Serilog;
 using System.Text;
@@ -78,6 +79,16 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 
+// تنظیم لاگ
+builder.Logging.ClearProviders();
+builder.Logging.AddConsole(); // نمایش لاگ‌ها در کنسول
+builder.Logging.AddDebug();   // ارسال لاگ‌ها به Debug
+builder.Logging.AddFile("Logs/log-{Date}.txt"); // ذخیره در فایل (نیاز به افزودن یک پکیج دارد)
+
+
+
+
+
 
 // افزودن AutoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -125,11 +136,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllerRoute(
+    name: "areas",
+    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
+
+app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
-app.MapControllerRoute(
-    name: "areas",
-    pattern: "{area:exists}/{controller=Home}/{action=Index}/{id?}");
 
 app.Run();
